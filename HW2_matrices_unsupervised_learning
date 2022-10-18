@@ -1,0 +1,122 @@
+#SPECTRAL DECOMPOSITION
+
+import numpy as np
+class SpectralDecompositionPowerMethod:
+
+    def __init__(self, max_iter = 1000, tolerance = 1e-5, gamma = 0.0, random_state = None, store_intermediate_results = False):
+
+        self.max_iter = max_iter
+        self.tolerance = tolerance
+        self.gamma = gamma
+
+        self.random_state = None
+        self.store_immediate_results = False
+
+        if store_intermediate_results:
+            self.stored_eigenvalues = []
+            self.stored_eigenvectors = []
+
+    def fit(self, A):
+
+        def norm(v):
+            return(v/(np.sqrt(np.sum(v**2))))
+
+        def mat_vec_multiply(A, v):
+            components = []
+            sumcomponents = []
+            m,n = np.shape(A)
+            for i in range(m):
+                for j in range(n):
+                    components.append(A[i][j]*v[j])
+                sumcomponents.append(np.sum(components))
+                components.clear()
+            return np.array(sumcomponents).reshape(m,1)
+
+        def mag(v):
+            return(np.sqrt(np.sum(v**2)))
+
+        v = np.random.rand(m, 1)
+
+        for i in range(self.max_iter):
+
+            i == 0
+            while tol > self.tolerance:
+                v_old = np.copy(v)
+                v_new = mat_vec_multiply(A, v)
+
+                tol = np.mean(np.sqrt((norm(v_old)-norm(v_new))**2/v_old**2))
+
+                v = self.gamma * v_old + (1 - self.gamma) * v_new
+
+                i += 1
+                
+                if self.store_intermediate_results:
+                    self.stored_eigenvalues.append(mag(mat_vec_multiply(A, v)))
+                    self.stored_eigenvectors.append(v)
+         
+            if i == self.max_iter and tolerance:
+                print('the series does not converge in the limit of %i iterations' % self.max_iter)
+
+            else:
+                eig_val = mag(mat_vec_multiply(A, v_new))
+
+                self.components = v_new
+                self.singular_values = eig_val
+
+        if self.store_intermediate_results:
+            self.stored_eigenvalues = np.array(self.stored_eigenvalues)
+            self.stored_eigenvectors = np.array(self.stored_eigenvectors)
+            
+import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
+
+class PrincipalComponents(BaseEstimator, TransformerMixin):
+    self.random_state = random_state
+    self.components_ = None
+    self.singular_values_ = None
+
+
+    def fit(self, X):
+    
+        n = len(X) #number of rows (number of data points)
+
+        uT = np.mean(X, axis = 0) #mean of each column expressed as a row vector
+        h = np.ones(len(X)).reshape(n,1) #column vector of ones
+        huT = np.outer(h, uT) #matrix produced by outer product of h and uT
+
+        B = X - huT
+
+        C = np.cov(B, rowvar = False)
+        eigvals, eigvecs = np.linalg.eigh(C) #use eigh since covariance matrix is hermitian
+        eigvecs = eigvecs.T
+
+        sort = np.argsort(eigvals)[::-1]
+
+        eigvals, eigvecs = eigvals[sort], eigvecs[sort]
+
+        self.components_ = eigvecs
+        self.singular_values_ = eigvals
+
+        return self
+
+    def transform(self, X):
+
+        n = len(X)
+
+        uT = np.mean(X, axis = 0)
+        h = np.ones(len(X)).reshape(n,1)
+        huT = np.outer(h, uT)
+
+        B = X - huT
+
+        return B.dot(self.components._T)
+
+    def inversetransform(self, X):
+
+        n = len(X)
+
+        uT = np.mean(X, axis = 0)
+        h = np.ones(len(X)).reshape(n,1)
+        huT = np.outer(h, uT)
+
+        return X.dot(self.components_) + huT
