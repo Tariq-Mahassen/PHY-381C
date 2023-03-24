@@ -118,13 +118,6 @@ class GrayScott:
             y (np.ndarray): array of shape (2 * nx * ny, ) containing the two fields
                 u and v, stacked together
         """
-        ########################################################################
-        #
-        # Your code here. If you are performing the reaction in real space, this is
-        # relatively straightforward. If you are performing the reaction in Fourier
-        # space, you will need to perform an inverse Fourier transform
-        #
-        ########################################################################
         u, v = y[:(self.ny * self.nx)], y[-(self.ny * self.nx):]
         uv2 = u * (v**2)
         rxn_u = -uv2 + self.b * (1 - u)
@@ -158,12 +151,6 @@ class GrayScott:
         """
         Calculate the Laplacian in Fourier space
         """
-         ########################################################################
-        #
-        # Your code here.
-        #
-        ########################################################################
-        y = np.reshape(y, (self.nx, self.ny))
         yk = np.fft.fft2(y)
         lap = -self.ksq * yk
         lap = np.fft.ifft2(lap)
@@ -177,11 +164,6 @@ class GrayScott:
             y (np.ndarray): array of shape (2 * nx * ny, ) containing the two fields
                 u and v, stacked together
         """
-        ########################################################################
-        #
-        # Your code here. I split the Laplace operator into its own function
-        #
-        ########################################################################
         u, v = y[:(self.ny * self.nx)], y[-(self.ny * self.nx):]
         lap_u = self._laplace(u)
         lap_v = self._laplace(v)
@@ -197,11 +179,6 @@ class GrayScott:
         For technical reasons, this function needs to take a one-dimensional vector, 
         and so we have to reshape the vector back into the mesh
         """
-        ########################################################################
-        #
-        # Your code here. This mainly calls other functions, in my implementation
-        #
-        ########################################################################
         out = self._reaction(y) + self._diffusion(y)
         return out
 
@@ -216,13 +193,6 @@ class GrayScott:
             nt (int): number of time steps
             **kwargs: keyword arguments to pass to solve_ivp
         """
-        ########################################################################
-        #
-        # Your code here. I recommend using the solve_ivp solver, along with judicious
-        # use of np.reshape operation and np.hstack, because solve_ivp expects a
-        # one-dimensional vector as input
-        #
-        ########################################################################
         u0, v0 = y0
         tpts = np.linspace(t_min, t_max, nt)
         y0 = np.hstack([u0.flatten(), v0.flatten()])
