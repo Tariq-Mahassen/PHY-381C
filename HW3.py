@@ -26,12 +26,6 @@ class AllenCahn:
         Bistable reaction term: cast into real space, perform reaction, and then cast
         back into Fourier space.
         """
-        ################################################
-        #
-        # Your code here. I recommend performing the reaction in real space, and using
-        # the appropriate transformations to cast back and forth within the function.
-        #
-        ################################################
         y = np.reshape(y, (self.ny, self.nx))
         yh = np.fft.ifft2(y)
         out = np.fft.fft2(yh * (1 - yh**2))
